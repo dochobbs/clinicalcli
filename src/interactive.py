@@ -38,7 +38,7 @@ from .model_manager import get_model_manager
 from .commands.cds import CDS_SYSTEM_PROMPT
 from .commands.ddx import DDX_SYSTEM_PROMPT
 from .commands.note import NOTE_SYSTEM_PROMPT
-from .commands.parse import PARSE_SYSTEM_PROMPT
+from .commands.image_analysis import IMAGE_ANALYSIS_SYSTEM_PROMPT
 
 console = Console()
 
@@ -97,7 +97,7 @@ class ClinicalShell:
             'cds', 'c',            # Clinical decision support
             'ddx',                 # Differential diagnosis
             'note',                # Clinical note
-            'parse',               # Parse documents
+            'image', 'img',        # Analyze clinical images (rashes, lesions, etc.)
             'dose',                # Quick dose calculation
             'compare',             # Compare medications
             'copy',                # Copy last output to clipboard
@@ -209,14 +209,16 @@ Examples:
   note 5yo with AOM     # Defaults to full
 ```
 
-## Parse Documents
+## Clinical Image Analysis
 ```
-parse <filename>            # Analyze PDF or image
+image <filename>            # Analyze clinical images (rashes, lesions, injuries)
+img <filename>              # Shortcut
 
 Examples:
-  parse labs.pdf
-  parse ~/Desktop/cbc.png
-  parse xray.pdf
+  image rash.jpg           # Analyze a rash photo
+  img throat.png           # Analyze throat exam photo
+  image lesion.jpg         # Analyze skin lesion
+  image ~/Desktop/bite.png # Analyze insect bite
 ```
 
 ## Model Selection
@@ -590,13 +592,14 @@ OUTPUT FORMAT: QUICK (concise but complete)
         display_output(response, title=f"{note_type.upper()} Note [{format_label}]")
         self.state.command_count += 1
 
-    def execute_parse(self, args: str):
-        """Execute document parsing."""
+    def execute_image(self, args: str):
+        """Execute clinical image analysis."""
         if not args.strip():
-            console.print("[yellow]Usage: parse <filename>[/yellow]")
-            console.print("[dim]Example: parse labs.pdf[/dim]")
-            console.print("[dim]Example: parse ~/Desktop/labs.pdf[/dim]")
-            console.print("[dim]Tip: Use quotes for paths with spaces: parse \"~/My Documents/file.pdf\"[/dim]")
+            console.print("[yellow]Usage: image <filename>[/yellow]")
+            console.print("[dim]Example: image rash.jpg[/dim]")
+            console.print("[dim]Example: img ~/Desktop/throat.png[/dim]")
+            console.print("[dim]Example: image lesion.jpg[/dim]")
+            console.print("[dim]Tip: Use quotes for paths with spaces: image \"~/My Photos/rash.jpg\"[/dim]")
             return
 
         # Get file path from args
@@ -617,20 +620,27 @@ OUTPUT FORMAT: QUICK (concise but complete)
             console.print("[dim]Tip: Use quotes for paths with spaces, or drag-and-drop the file into the terminal[/dim]")
             return
 
-        # Build user message
-        user_message = "Analyze this clinical document and extract all relevant information."
+        # Build user message focused on clinical image analysis
+        user_message = """Analyze this clinical image. Provide:
+1. Detailed description of what you see
+2. Differential diagnosis based on visual findings
+3. Assessment of severity and concerning features
+4. Triage recommendation (911/ED/urgent/routine/home care)
+5. Specific management recommendations
+6. Parent education points"""
 
-        console.print(f"\n[dim]Analyzing {os.path.basename(file_path)}...[/dim]\n")
+        console.print(f"\n[dim]Analyzing clinical image: {os.path.basename(file_path)}...[/dim]\n")
+        console.print("[cyan]Response:[/cyan]\n")
 
         try:
-            response = call_claude_with_files(PARSE_SYSTEM_PROMPT, user_message, [file_path])
+            response = call_claude_with_files(IMAGE_ANALYSIS_SYSTEM_PROMPT, user_message, [file_path])
 
             self.state.last_response = response  # Store for copy command
-            title = f"Document Analysis: {os.path.basename(file_path)}"
+            title = f"Clinical Image Analysis: {os.path.basename(file_path)}"
             display_output(response, title=title)
             self.state.command_count += 1
         except Exception as e:
-            console.print(f"[red]Error parsing file: {e}[/red]")
+            console.print(f"[red]Error analyzing image: {e}[/red]")
 
     def execute_model(self, args: str):
         """Execute model management command."""
@@ -711,8 +721,8 @@ OUTPUT FORMAT: QUICK (concise but complete)
                 elif command == 'note':
                     self.execute_note(args)
 
-                elif command == 'parse':
-                    self.execute_parse(args)
+                elif command in ['image', 'img']:
+                    self.execute_image(args)
 
                 elif command == 'model':
                     self.execute_model(args)
