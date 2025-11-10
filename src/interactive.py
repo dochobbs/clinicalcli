@@ -595,10 +595,17 @@ OUTPUT FORMAT: QUICK (concise but complete)
         if not args.strip():
             console.print("[yellow]Usage: parse <filename>[/yellow]")
             console.print("[dim]Example: parse labs.pdf[/dim]")
+            console.print("[dim]Example: parse ~/Desktop/labs.pdf[/dim]")
+            console.print("[dim]Tip: Use quotes for paths with spaces: parse \"~/My Documents/file.pdf\"[/dim]")
             return
 
         # Get file path from args
         file_path = args.strip()
+
+        # Remove surrounding quotes if present
+        if (file_path.startswith('"') and file_path.endswith('"')) or \
+           (file_path.startswith("'") and file_path.endswith("'")):
+            file_path = file_path[1:-1]
 
         # Expand home directory if needed
         if file_path.startswith('~'):
@@ -607,6 +614,7 @@ OUTPUT FORMAT: QUICK (concise but complete)
         # Check if file exists
         if not os.path.exists(file_path):
             console.print(f"[red]Error: File not found: {file_path}[/red]")
+            console.print("[dim]Tip: Use quotes for paths with spaces, or drag-and-drop the file into the terminal[/dim]")
             return
 
         # Build user message

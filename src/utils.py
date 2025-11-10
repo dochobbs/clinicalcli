@@ -195,7 +195,11 @@ def process_pdf_file(file_path: str) -> str:
                 text_parts.append(f"--- Page {i} ---\n{page_text}")
 
         if not text_parts:
-            raise ValueError("No text could be extracted from PDF")
+            raise ValueError(
+                "No text could be extracted from PDF. This is likely a scanned/image-based PDF.\n"
+                "Workaround: Convert the PDF to images (PNG/JPG) and use 'parse image.png' instead.\n"
+                "Tools: Use Preview (macOS), Adobe Acrobat, or online converters to export as images."
+            )
 
         return "\n\n".join(text_parts)
 
