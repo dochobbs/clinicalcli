@@ -49,10 +49,10 @@ For actual clinical use:
 ```bash
 ./clinical-shell
 ⚕️  clinical> model claude-sonnet-4-5-20250929  # Best quality
-⚕️  clinical> model claude-3-5-haiku-20241022   # Faster when needed
+⚕️  clinical> model claude-haiku-4-5-20251001   # Faster when needed
 ```
 
-**Claude Haiku** is your best option when you need speed - it's:
+**Claude Haiku 4.5** is your best option when you need speed - it's:
 - Still faster than ANY local model
 - Better quality than local models
 - Optimized for quick responses
@@ -220,7 +220,7 @@ The Clinical CLI is designed for **fast, accurate clinical decision support**. L
 ⚕️  clinical> model claude-sonnet-4-5-20250929
 
 # When you need speed
-⚕️  clinical> model claude-3-5-haiku-20241022
+⚕️  clinical> model claude-haiku-4-5-20251001
 
 # Avoid local models for clinical use
 ```
@@ -250,7 +250,7 @@ We've simplified the Claude model list to the essentials:
 
 Anthropic Claude (Cloud):
   [✓] claude-sonnet-4-5-20250929  # Best quality
-  [ ] claude-3-5-haiku-20241022   # Faster
+  [ ] claude-haiku-4-5-20251001   # Faster
 
 LM Studio (Local):
   [ ] llama-3.2-3b-instruct       # Slow but available offline

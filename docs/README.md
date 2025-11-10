@@ -44,6 +44,7 @@ This documentation is organized to help you get started quickly and find informa
 
 **Working with different AI models:**
 
+- **[Local Models Guide](LOCAL_MODELS_GUIDE.md)** - Complete guide to using offline models ⭐ **START HERE**
 - **[Model Selection Guide](SINGLE_LINE_AND_MODEL_SELECTOR.md)** - Switching between models
 - **[LM Studio Support](LMSTUDIO_SUPPORT.md)** - Using LM Studio for offline models
 - **[Local Model Performance](LOCAL_MODEL_PERFORMANCE.md)** - Performance expectations
@@ -118,6 +119,7 @@ This documentation is organized to help you get started quickly and find informa
 - [Default Model (Haiku)](DEFAULT_MODEL_HAIKU.md)
 
 **Offline/Local Use:**
+- [Local Models Guide](LOCAL_MODELS_GUIDE.md) ⭐ **Complete offline setup guide**
 - [LM Studio Support](LMSTUDIO_SUPPORT.md)
 - [Local Model Performance](LOCAL_MODEL_PERFORMANCE.md)
 - [Model Selection Guide](SINGLE_LINE_AND_MODEL_SELECTOR.md)
