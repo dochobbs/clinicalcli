@@ -158,7 +158,7 @@ class ClinicalShell:
 ## Output Formats
 ```
 Most commands support quick (q) or full (f) output formats:
-  q = Quick: Concise, essential info only (fast to scan)
+  q = Quick: Concise but complete, clinically useful (250-400 words)
   f = Full:  Comprehensive, detailed info (default)
 ```
 
@@ -319,13 +319,14 @@ quit   or   exit   or   q  # Exit shell
 
         # Set output format instruction
         if output_format == "quick":
-            user_message = f"""Provide QUICK, CONCISE pediatric drug information for: {drug_name}
+            user_message = f"""Provide QUICK pediatric drug information for: {drug_name}
 
-OUTPUT FORMAT: QUICK
-- Keep response under 200 words
-- Bullet points only
-- Include ONLY: standard dose, key indication(s), critical warnings
-- Skip: detailed pharmacology, extensive precautions, unnecessary details"""
+OUTPUT FORMAT: QUICK (concise but complete)
+- Keep response under 300-400 words
+- Use clear sections with bullet points
+- Include: standard dose with calculation, key indications, dosing frequency, common formulations, critical warnings, monitoring
+- Provide enough detail to be clinically useful
+- Skip only: extensive pharmacology, drug interactions, rare side effects"""
         else:
             user_message = f"Provide comprehensive PEDIATRIC drug information for: {drug_name}"
 
@@ -442,12 +443,13 @@ CITE YOUR SOURCES and note if evidence is limited.
 
 {clinical_presentation}
 
-OUTPUT FORMAT: QUICK
-- Keep under 150 words
-- Assessment (1-2 sentences)
-- Top 3 differential diagnoses
-- Key plan/recommendations only
-- Red flags if applicable"""
+OUTPUT FORMAT: QUICK (concise but complete)
+- Keep under 250-300 words
+- Assessment (2-3 sentences with key features)
+- Top 5 differential diagnoses with brief likelihood
+- Management plan with specific recommendations
+- Red flags and when to escalate care
+- Follow-up guidance"""
         else:
             user_message = f"Provide pediatric clinical decision support for:\n\n{clinical_presentation}"
 
@@ -492,11 +494,12 @@ OUTPUT FORMAT: QUICK
 
 {clinical_presentation}
 
-OUTPUT FORMAT: QUICK
-- List top 5 diagnoses only
-- Each diagnosis: 1 line with likelihood (common/uncommon/rare)
-- Keep under 100 words total
-- Most likely first"""
+OUTPUT FORMAT: QUICK (concise but complete)
+- List top 7 diagnoses
+- Each diagnosis: likelihood + 1-2 key distinguishing features
+- Keep under 200-250 words total
+- Most likely diagnoses first
+- Include any "can't miss" diagnoses"""
         else:
             user_message = f"Generate a differential diagnosis for:\n\n{clinical_presentation}"
             user_message += "\n\n[Focus on most likely common diagnoses, but don't miss serious ones]"
@@ -552,15 +555,16 @@ OUTPUT FORMAT: QUICK
 
         # Build user message with format instruction
         if output_format == "quick":
-            user_message = f"""Generate a BRIEF {note_type.upper()} note from the following encounter:
+            user_message = f"""Generate a CONCISE {note_type.upper()} note from the following encounter:
 
 {encounter_info}
 
-OUTPUT FORMAT: QUICK
-- Keep under 150 words
-- Essential elements only
-- Concise bullet points acceptable
-- Most relevant information only"""
+OUTPUT FORMAT: QUICK (concise but complete)
+- Keep under 250-300 words
+- Include all essential clinical elements
+- Use bullets for efficiency but maintain professional format
+- Cover: chief complaint, key findings, assessment, plan
+- Suitable for medical documentation"""
         else:
             user_message = f"Generate a {note_type.upper()} note from the following encounter:\n\n{encounter_info}"
 

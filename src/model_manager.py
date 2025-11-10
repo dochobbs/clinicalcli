@@ -16,12 +16,12 @@ class ModelManager:
 
     # Available models
     ANTHROPIC_MODELS = [
-        "claude-sonnet-4-5-20250929",  # Latest Sonnet (best quality)
-        "claude-haiku-4-5-20251001",   # Latest Haiku (default, faster)
+        "claude-sonnet-4-5-20250929",  # Latest Sonnet (best quality, default)
+        "claude-haiku-4-5-20251001",   # Latest Haiku (faster)
     ]
 
     def __init__(self):
-        self.current_model = "claude-haiku-4-5-20251001"  # Default to Haiku (faster)
+        self.current_model = "claude-sonnet-4-5-20250929"  # Default to Sonnet (best quality)
         self.model_type = "anthropic"  # or "ollama" or "lmstudio"
         self.ollama_base_url = "http://localhost:11434"  # Default Ollama URL
         self.lmstudio_base_url = "http://localhost:1234/v1"  # Default LM Studio URL
