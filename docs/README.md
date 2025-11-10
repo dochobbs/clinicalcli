@@ -21,6 +21,7 @@ This documentation is organized to help you get started quickly and find informa
 ### Essential Reading
 
 - **[Commands Reference](COMMANDS_REFERENCE.md)** - Complete list of all available commands
+- **[Output Formats Guide](OUTPUT_FORMATS.md)** - Quick vs Full output formats ⭐ **NEW**
 - **[Complete System Overview](COMPLETE_SYSTEM_OVERVIEW.md)** - Architecture and design
 - **[Status](STATUS.md)** - Current project status and roadmap
 

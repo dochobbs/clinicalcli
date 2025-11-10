@@ -155,48 +155,58 @@ class ClinicalShell:
         help_text = """
 # Clinical CLI - Command Reference
 
+## Output Formats
+```
+Most commands support quick (q) or full (f) output formats:
+  q = Quick: Concise, essential info only (fast to scan)
+  f = Full:  Comprehensive, detailed info (default)
+```
+
 ## Drug Lookup
 ```
-drug <name> [--weight WT] [--age AGE] [--indication IND]
+drug <name> [q|f] [--weight WT] [--age AGE] [--indication IND]
 d <name>                    # Shortcut
 dose <name> <weight>        # Quick dose calc
 compare <drug1> <drug2>     # Compare medications
 
 Examples:
-  drug amoxicillin --weight 52# --age 5yo --indication "otitis media"
-  d amoxicillin --weight 52#
-  dose amox 52#             # Quick calculation
+  d amoxicillin q --weight 52# --age 5yo
+  d amoxicillin f --indication "strep throat"
+  d amoxicillin --weight 52#  # Defaults to full
+  dose amox 52#               # Quick calculation
   compare amoxicillin cefdinir
 ```
 
 ## Clinical Decision Support
 ```
-cds <clinical presentation>
+cds [q|f] <clinical presentation>
 c <clinical presentation>   # Shortcut
 
 Examples:
-  cds 5yo with fever x3 days, ear pain, decreased hearing
-  c 3yo with cough, wheezing, tachypnea
+  cds q 5yo with fever x3 days, ear pain
+  cds f 3yo with cough, wheezing, tachypnea
+  cds 5yo with fever    # Defaults to full
 ```
 
 ## Differential Diagnosis
 ```
-ddx <clinical presentation>
+ddx [q|f] <clinical presentation>
 
 Examples:
-  ddx 5yo with fever, ear pain, decreased hearing
-  ddx 12yo with headache, photophobia, neck stiffness
+  ddx q 5yo with fever, ear pain
+  ddx f 12yo with headache, photophobia
+  ddx 5yo with fever    # Defaults to full
 ```
 
 ## Clinical Notes
 ```
-note <encounter info>
-note <type> <encounter info>
+note [q|f] [type] <encounter info>
 
 Examples:
-  note 5yo with AOM, starting amoxicillin
-  note progress doing better, fever resolved
-  note discharge resolved AOM, completing antibiotics
+  note q 5yo with AOM, starting amoxicillin
+  note f progress doing better, fever resolved
+  note q discharge resolved AOM
+  note 5yo with AOM     # Defaults to full
 ```
 
 ## Parse Documents
@@ -244,7 +254,8 @@ quit   or   exit   or   q  # Exit shell
 - Ctrl+C to cancel current command
 - Use 'copy' command to copy last output to clipboard
 - Specify weight/age with each drug command as needed
-- Use local models (Ollama) for offline work
+- Use 'q' for quick output (concise), 'f' or omit for full (detailed)
+- Use local models (Ollama/LM Studio) for offline work
 """
         console.print(Markdown(help_text))
 
@@ -269,13 +280,21 @@ quit   or   exit   or   q  # Exit shell
         # Parse arguments
         parts = args.split()
         if not parts:
-            console.print("[yellow]Usage: drug <medication> [--weight WT] [--age AGE] [--indication IND][/yellow]")
-            console.print("[dim]Example: d amoxicillin --weight 52# --age 5yo[/dim]")
+            console.print("[yellow]Usage: drug <medication> [q|f] [--weight WT] [--age AGE] [--indication IND][/yellow]")
+            console.print("[dim]Example: d amoxicillin q --weight 52# --age 5yo[/dim]")
+            console.print("[dim]         d amoxicillin f --indication 'strep throat'[/dim]")
+            console.print("[dim]         q = quick (concise), f = full (detailed, default)[/dim]")
             return
 
         drug_name = parts[0]
 
-        # Parse flags
+        # Parse output format flag (q or f)
+        output_format = "full"  # default
+        if len(parts) > 1 and parts[1] in ['q', 'f']:
+            output_format = "quick" if parts[1] == 'q' else "full"
+            parts.pop(1)  # Remove format flag from parts
+
+        # Parse other flags
         weight = None
         age = None
         indication = None
@@ -297,7 +316,18 @@ quit   or   exit   or   q  # Exit shell
 
         # Build prompt
         system_prompt = load_prompt("drug_lookup")
-        user_message = f"Provide comprehensive PEDIATRIC drug information for: {drug_name}"
+
+        # Set output format instruction
+        if output_format == "quick":
+            user_message = f"""Provide QUICK, CONCISE pediatric drug information for: {drug_name}
+
+OUTPUT FORMAT: QUICK
+- Keep response under 200 words
+- Bullet points only
+- Include ONLY: standard dose, key indication(s), critical warnings
+- Skip: detailed pharmacology, extensive precautions, unnecessary details"""
+        else:
+            user_message = f"Provide comprehensive PEDIATRIC drug information for: {drug_name}"
 
         if indication:
             user_message += f"\n\nSpecific indication: {indication}"
@@ -334,7 +364,8 @@ IMPORTANT:
             console.print("\n[yellow]⚠️  Note: Response includes uncertainties or off-label uses[/yellow]\n")
 
         # Display
-        title = f"Pediatric Drug Info: {drug_name.title()}"
+        format_label = "Quick" if output_format == "quick" else "Full"
+        title = f"Pediatric Drug Info [{format_label}]: {drug_name.title()}"
         if weight:
             title += f" - {weight}"
 
@@ -390,14 +421,37 @@ CITE YOUR SOURCES and note if evidence is limited.
     def execute_cds(self, args: str):
         """Execute clinical decision support."""
         if not args.strip():
-            console.print("[yellow]Usage: cds <clinical presentation>[/yellow]")
-            console.print("[dim]Example: cds 5yo with fever x3 days, ear pain, decreased hearing[/dim]")
+            console.print("[yellow]Usage: cds [q|f] <clinical presentation>[/yellow]")
+            console.print("[dim]Example: cds q 5yo with fever x3 days, ear pain[/dim]")
+            console.print("[dim]         cds f 5yo with fever x3 days, ear pain[/dim]")
+            console.print("[dim]         q = quick (brief), f = full (detailed, default)[/dim]")
             return
 
-        # Build user message
-        user_message = f"Provide pediatric clinical decision support for:\n\n{args}"
+        # Parse output format
+        parts = args.split(maxsplit=1)
+        output_format = "full"  # default
+        clinical_presentation = args
 
-        console.print(f"\n[dim]Analyzing: {args[:60]}...[/dim]\n")
+        if len(parts) > 1 and parts[0] in ['q', 'f']:
+            output_format = "quick" if parts[0] == 'q' else "full"
+            clinical_presentation = parts[1]
+
+        # Build user message with format instruction
+        if output_format == "quick":
+            user_message = f"""Provide QUICK clinical decision support for:
+
+{clinical_presentation}
+
+OUTPUT FORMAT: QUICK
+- Keep under 150 words
+- Assessment (1-2 sentences)
+- Top 3 differential diagnoses
+- Key plan/recommendations only
+- Red flags if applicable"""
+        else:
+            user_message = f"Provide pediatric clinical decision support for:\n\n{clinical_presentation}"
+
+        console.print(f"\n[dim]Analyzing: {clinical_presentation[:60]}...[/dim]\n")
         console.print("[cyan]Response:[/cyan]\n")
 
         response = call_claude(CDS_SYSTEM_PROMPT, user_message)
@@ -409,56 +463,106 @@ CITE YOUR SOURCES and note if evidence is limited.
         if has_red_flags:
             console.print("\n[red]🚨 ALERT: Response includes emergent/urgent indicators[/red]\n")
 
+        format_label = "Quick" if output_format == "quick" else "Full"
         self.state.last_response = response  # Store for copy command
-        display_output(response, title="Clinical Decision Support")
+        display_output(response, title=f"Clinical Decision Support [{format_label}]")
         self.state.command_count += 1
 
     def execute_ddx(self, args: str):
         """Execute differential diagnosis."""
         if not args.strip():
-            console.print("[yellow]Usage: ddx <clinical presentation>[/yellow]")
-            console.print("[dim]Example: ddx 5yo with fever, ear pain, decreased hearing[/dim]")
+            console.print("[yellow]Usage: ddx [q|f] <clinical presentation>[/yellow]")
+            console.print("[dim]Example: ddx q 5yo with fever, ear pain[/dim]")
+            console.print("[dim]         ddx f 5yo with fever, ear pain[/dim]")
+            console.print("[dim]         q = quick (top 5), f = full (comprehensive, default)[/dim]")
             return
 
-        # Build user message
-        user_message = f"Generate a differential diagnosis for:\n\n{args}"
-        user_message += "\n\n[Focus on most likely common diagnoses, but don't miss serious ones]"
+        # Parse output format
+        parts = args.split(maxsplit=1)
+        output_format = "full"  # default
+        clinical_presentation = args
 
-        console.print(f"\n[dim]Analyzing: {args[:60]}...[/dim]\n")
+        if len(parts) > 1 and parts[0] in ['q', 'f']:
+            output_format = "quick" if parts[0] == 'q' else "full"
+            clinical_presentation = parts[1]
+
+        # Build user message with format instruction
+        if output_format == "quick":
+            user_message = f"""Generate a QUICK differential diagnosis for:
+
+{clinical_presentation}
+
+OUTPUT FORMAT: QUICK
+- List top 5 diagnoses only
+- Each diagnosis: 1 line with likelihood (common/uncommon/rare)
+- Keep under 100 words total
+- Most likely first"""
+        else:
+            user_message = f"Generate a differential diagnosis for:\n\n{clinical_presentation}"
+            user_message += "\n\n[Focus on most likely common diagnoses, but don't miss serious ones]"
+
+        console.print(f"\n[dim]Analyzing: {clinical_presentation[:60]}...[/dim]\n")
         console.print("[cyan]Response:[/cyan]\n")
 
         response = call_claude(DDX_SYSTEM_PROMPT, user_message)
 
+        format_label = "Quick" if output_format == "quick" else "Full"
         self.state.last_response = response  # Store for copy command
-        display_output(response, title="Differential Diagnosis")
+        display_output(response, title=f"Differential Diagnosis [{format_label}]")
         self.state.command_count += 1
 
     def execute_note(self, args: str):
         """Execute clinical note generation."""
-        # Check if it's a note type or content
         note_types = ['soap', 'progress', 'consult', 'procedure', 'discharge']
-        parts = args.strip().split(maxsplit=1)
+        parts = args.strip().split()
 
         if not parts:
-            console.print("[yellow]Usage: note <encounter info> OR note <type> <encounter info>[/yellow]")
-            console.print("[dim]Example: note 5yo with AOM, starting amoxicillin[/dim]")
-            console.print("[dim]Example: note progress doing better, fever resolved[/dim]")
+            console.print("[yellow]Usage: note [q|f] [type] <encounter info>[/yellow]")
+            console.print("[dim]Example: note q 5yo with AOM, starting amoxicillin[/dim]")
+            console.print("[dim]Example: note f progress doing better, fever resolved[/dim]")
+            console.print("[dim]         q = quick (brief), f = full (detailed, default)[/dim]")
             return
 
-        # Check if first word is a note type
-        note_type = "soap"  # Default
-        encounter_info = args
+        # Parse output format (q or f)
+        output_format = "full"  # default
+        start_idx = 0
 
-        if parts[0].lower() in note_types:
-            note_type = parts[0].lower()
-            encounter_info = parts[1] if len(parts) > 1 else ""
+        if parts[0] in ['q', 'f']:
+            output_format = "quick" if parts[0] == 'q' else "full"
+            start_idx = 1
 
-        if not encounter_info.strip():
+        if start_idx >= len(parts):
             console.print("[yellow]No encounter information provided[/yellow]")
             return
 
-        # Build user message
-        user_message = f"Generate a {note_type.upper()} note from the following encounter:\n\n{encounter_info}"
+        # Check if next word is a note type
+        note_type = "soap"  # Default
+        encounter_start_idx = start_idx
+
+        if parts[start_idx].lower() in note_types:
+            note_type = parts[start_idx].lower()
+            encounter_start_idx = start_idx + 1
+
+        if encounter_start_idx >= len(parts):
+            console.print("[yellow]No encounter information provided[/yellow]")
+            return
+
+        # Get encounter info
+        encounter_info = ' '.join(parts[encounter_start_idx:])
+
+        # Build user message with format instruction
+        if output_format == "quick":
+            user_message = f"""Generate a BRIEF {note_type.upper()} note from the following encounter:
+
+{encounter_info}
+
+OUTPUT FORMAT: QUICK
+- Keep under 150 words
+- Essential elements only
+- Concise bullet points acceptable
+- Most relevant information only"""
+        else:
+            user_message = f"Generate a {note_type.upper()} note from the following encounter:\n\n{encounter_info}"
 
         # Adjust system prompt based on note type
         system_prompt = NOTE_SYSTEM_PROMPT
@@ -477,8 +581,9 @@ CITE YOUR SOURCES and note if evidence is limited.
 
         response = call_claude(system_prompt, user_message)
 
+        format_label = "Quick" if output_format == "quick" else "Full"
         self.state.last_response = response  # Store for copy command
-        display_output(response, title=f"{note_type.upper()} Note")
+        display_output(response, title=f"{note_type.upper()} Note [{format_label}]")
         self.state.command_count += 1
 
     def execute_parse(self, args: str):
