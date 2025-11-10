@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Outputs (if you decide to save outputs to files)
+outputs/
+*.txt
+*.pdf
+*.docx
+
+# Environment variables (if you add a .env file)
+.env
+.env.local

@@ -1,0 +1,12 @@
+#!/bin/bash
+# Clinical CLI Interactive Shell Launcher
+
+# Get the directory where this script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# Activate virtual environment
+source "$SCRIPT_DIR/.venv/bin/activate"
+
+# Change to project directory and run as module
+cd "$SCRIPT_DIR"
+python -m src.interactive
