@@ -1,355 +1,434 @@
-# Clinical CLI - PHI-Safe Clinical Decision Support
+# Clinical CLI - Pediatric Clinical Decision Support Tool
 
-A command-line tool for physicians to use Claude AI for clinical decision support, documentation, and patient education while handling Protected Health Information (PHI) under a Business Associate Agreement with Anthropic.
+**Fast, interactive AI-powered clinical decision support for pediatric care.**
 
-## Features
-
-### Core Commands
-
-1. **`cds`** - Clinical Decision Support
-   - Evidence-based clinical guidance
-   - Differential diagnosis consideration
-   - Workup and management recommendations
-   - Red flag identification
-
-2. **`handout`** - Patient Education Materials
-   - Plain-language patient handouts
-   - Customizable reading level
-   - Condition-specific information
-   - Multi-language support
-
-3. **`note`** - Clinical Documentation
-   - SOAP notes
-   - Progress notes
-   - Consultation notes
-   - Procedure notes
-   - Discharge summaries
-
-4. **`prior-auth`** - Prior Authorization Letters
-   - Medical necessity documentation
-   - Evidence-based justification
-   - Appeal letter generation
-   - Urgent/expedited requests
-
-5. **`referral`** - Specialist Referral Letters
-   - Professional colleague communications
-   - Clinical context and workup summary
-   - Specific consultation requests
-
-6. **`ddx`** - Differential Diagnosis
-   - Systematic differential generation
-   - Likelihood ranking
-   - "Can't miss" diagnosis highlighting
-   - Targeted workup suggestions
-
-7. **`parse`** - Document Analysis
-   - Parse screenshots and PDF files
-   - Extract lab results, imaging reports, consultation notes
-   - OCR and text extraction with interpretation
-   - Support for multiple file formats (PNG, JPG, PDF)
-
-8. **`drug`** - Drug Information Lookup (NEW)
-   - Comprehensive medication information
-   - Available dosing forms and strengths
-   - Cost comparison (generic vs brand)
-   - Patient instructions and safety information
-   - Compare multiple medications
-   - Pediatric dosing
-
-### File Attachment Support
-
-Most commands now support attaching files (screenshots, PDFs):
-- Use `--file` or `-f` flag to attach documents
-- Support for lab results, imaging, consultation notes
-- Automatic text extraction from PDFs
-- Vision API for screenshots and scanned documents
-
-## Requirements
-
-- Python 3.9+
-- Anthropic API key with BAA for PHI processing
-- macOS, Linux, or Windows
-
-## Installation
-
-### 1. Navigate to the directory
-```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
-```
-
-### 2. Create and activate virtual environment
-```bash
-python3 -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# OR
-.venv\Scripts\activate  # Windows
-```
-
-### 3. Install dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Verify API key
-The tool uses the `ANTHROPIC_API_KEY` from your environment (already configured in `~/.zshrc`).
-
-To verify:
-```bash
-echo $ANTHROPIC_API_KEY
-```
-
-### 5. Make CLI executable (optional)
-```bash
-chmod +x src/cli.py
-```
-
-## Usage
-
-### Basic Usage
-
-Activate the virtual environment first:
-```bash
-source .venv/bin/activate
-```
-
-Run commands:
-```bash
-python src/cli.py <command> [options]
-```
-
-### Command Examples
-
-#### Clinical Decision Support
-```bash
-# Basic CDS query
-python src/cli.py cds
-
-# Pediatric case
-python src/cli.py cds --specialty pediatrics
-
-# Urgent case
-python src/cli.py cds --urgent
-```
-
-#### Patient Handouts
-```bash
-# Create handout for a condition
-python src/cli.py handout --condition "asthma management"
-
-# Simple language version
-python src/cli.py handout --condition "diabetes" --reading-level simple
-
-# Spanish language
-python src/cli.py handout --condition "hypertension" --language Spanish
-```
-
-#### Clinical Notes
-```bash
-# Generate SOAP note
-python src/cli.py note
-
-# Consultation note
-python src/cli.py note --type consult --specialty cardiology
-
-# Note with billing detail
-python src/cli.py note --billing
-```
-
-#### Prior Authorization
-```bash
-# Request for service
-python src/cli.py prior-auth --service "MRI lumbar spine"
-
-# Urgent request
-python src/cli.py prior-auth --urgent
-
-# Appeal a denial
-python src/cli.py prior-auth --appeal
-```
-
-#### Referral Letters
-```bash
-# Referral to specialist
-python src/cli.py referral --specialty neurology
-
-# Urgent referral
-python src/cli.py referral --specialty cardiology --urgent
-```
-
-#### Differential Diagnosis
-```bash
-# Generate differential
-python src/cli.py ddx
-
-# Focus on specific system
-python src/cli.py ddx --system respiratory
-
-# Include rare diagnoses
-python src/cli.py ddx --broad
-
-# Pediatric case
-python src/cli.py ddx --age pediatric
-```
-
-#### Document Parsing (NEW)
-```bash
-# Parse a lab result PDF
-python src/cli.py parse labs.pdf
-
-# Parse multiple files at once
-python src/cli.py parse labs.pdf xray.png
-
-# Parse with document type hint
-python src/cli.py parse report.pdf --type imaging
-
-# Just extract text without interpretation
-python src/cli.py parse consult.pdf --extract-only
-
-# Ask specific question about document
-python src/cli.py parse discharge.pdf --question "What medications were prescribed?"
-```
-
-#### Drug Information Lookup (NEW)
-```bash
-# Look up a medication
-python src/cli.py drug lisinopril
-
-# Compare multiple drugs
-python src/cli.py drug sertraline fluoxetine paroxetine --compare
-
-# Pediatric dosing
-python src/cli.py drug amoxicillin --pediatric
-
-# For specific indication
-python src/cli.py drug metformin --indication "type 2 diabetes"
-
-# Generic options only
-python src/cli.py drug atorvastatin --generic-only
-
-# Ask specific question
-python src/cli.py drug warfarin --question "What are the major interactions?"
-
-# Combined options
-python src/cli.py drug amoxicillin --pediatric --indication "otitis media"
-```
-
-#### Using Files with Other Commands
-```bash
-# CDS with attached lab results
-python src/cli.py cds --file labs.pdf --file xray.png
-
-# You'll be prompted to enter clinical context
-# The files will be automatically analyzed with your input
-
-# Note generation with attached documents
-python src/cli.py note --file consult.pdf --file labs.pdf
-```
-
-### Getting Help
-```bash
-# General help
-python src/cli.py --help
-
-# Command-specific help
-python src/cli.py cds --help
-python src/cli.py note --help
-```
-
-## Input Methods
-
-Most commands support multiline input:
-- Type or paste your clinical information
-- Press **Ctrl+D** (macOS/Linux) or **Ctrl+Z** (Windows) when done
-- The tool will process and display results
-
-## Output
-
-- Results display in formatted markdown panels
-- Automatic clipboard copy option (configurable per command)
-- All outputs ready to paste into EMR, letters, or documents
-
-## HIPAA Compliance
-
-⚠️ **PHI Warning**: This tool processes Protected Health Information.
-
-- **BAA Required**: Only use with Anthropic API under signed BAA
-- **Authorized Use**: Ensure proper authorization for PHI processing
-- **Secure Handling**: Do not share outputs containing PHI insecurely
-- **Audit Trail**: Consider logging usage for compliance
-
-## Model Information
-
-- Default model: **Claude Sonnet 4.5** (`claude-sonnet-4-5-20250929`)
-- Max tokens: 4096 per response
-- Optimized for medical accuracy and clinical reasoning
-
-## Development
-
-### Project Structure
-```
-clinical-cli/
-├── src/
-│   ├── cli.py              # Main CLI entry point
-│   ├── utils.py            # Shared utilities
-│   └── commands/           # Individual command modules
-│       ├── __init__.py
-│       ├── cds.py
-│       ├── handout.py
-│       ├── note.py
-│       ├── prior_auth.py
-│       ├── referral.py
-│       └── ddx.py
-├── requirements.txt
-└── README.md
-```
-
-### Adding New Commands
-
-1. Create new command file in `src/commands/`
-2. Define system prompt and command function
-3. Import and register in `src/cli.py`
-4. Test with `python src/cli.py <new-command> --help`
-
-### Future Enhancements
-
-Potential additions:
-- Lab interpretation command
-- ICD-10/CPT code lookup
-- Drug interaction checker
-- Evidence-based medicine queries
-- Literature search integration
-- Template management system
-- Batch processing mode
-- Output format options (PDF, DOCX)
-
-## Troubleshooting
-
-### "ANTHROPIC_API_KEY not found"
-- Verify: `echo $ANTHROPIC_API_KEY`
-- If empty, add to `~/.zshrc`: `export ANTHROPIC_API_KEY="your-key-here"`
-- Restart terminal or run: `source ~/.zshrc`
-
-### Import errors
-- Ensure virtual environment is activated
-- Reinstall: `pip install -r requirements.txt`
-
-### Clipboard not working
-- Install clipboard utilities: `brew install pbcopy` (macOS)
-- Or decline clipboard option when prompted
-
-## License
-
-Internal use only. Requires valid Anthropic API credentials and BAA for PHI processing.
-
-## Support
-
-For issues or questions:
-- Check command help: `python src/cli.py <command> --help`
-- Review this README
-- Consult Anthropic API documentation
+[![Version](https://img.shields.io/badge/version-1.3.0-blue.svg)](https://github.com/dochobbs/clinicalcli)
+[![Python](https://img.shields.io/badge/python-3.9+-green.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-Internal-red.svg)](LICENSE)
 
 ---
 
-**Version:** 1.0.0
+## 🚀 Quick Start
+
+```bash
+# Clone and setup
+git clone https://github.com/dochobbs/clinicalcli.git
+cd clinicalcli
+./setup.sh
+
+# Start interactive shell
+./clinical-shell
+
+# Try it out!
+⚕️  clinical> d amoxicillin --weight 52# --age 5yo
+⚕️  clinical> cds 5yo with fever x3 days, ear pain
+⚕️  clinical> help
+```
+
+**That's it!** Responses stream in real-time. ⚡
+
+---
+
+## ✨ Key Features
+
+### 🎯 Interactive Shell Mode
+- **Real-time streaming responses** - See results immediately (200-500ms)
+- **Single-line commands** - Fast, natural workflow
+- **Tab completion** - Quick command entry
+- **Command history** - Arrow keys to recall
+- **Copy on demand** - `copy` command when you need it
+
+### 💊 Clinical Commands
+- **`drug`** / **`d`** - Drug lookup with weight-based dosing
+- **`dose`** - Quick dose calculation
+- **`compare`** - Compare multiple medications
+- **`cds`** / **`c`** - Clinical decision support with red flag detection
+- **`ddx`** - Differential diagnosis generation
+- **`note`** - Clinical notes (SOAP, progress, consult, discharge)
+- **`parse`** - Analyze PDF/image documents
+
+### 🤖 AI Model Support
+- **Default:** Claude Haiku 4.5 (1-2 sec, optimized for speed) ⚡
+- **Quality:** Claude Sonnet 4.5 (2-5 sec, best for complex cases)
+- **Offline:** LM Studio and Ollama for local models
+- **Easy switching:** `model llama3.2` or `model claude-sonnet-4-5-20250929`
+
+### 🛡️ Safety Features
+- **3-layer dosing validation** - Weight, age, and range checking
+- **Red flag detection** - Emergent condition identification
+- **Anti-hallucination prompts** - Source citation requirements
+- **Session isolation** - No cross-patient data retention
+
+---
+
+## 📖 Documentation
+
+**Start here:** [docs/README.md](docs/README.md)
+
+### Quick Links
+- **[Quick Start Guide](docs/QUICKSTART.md)** - 5 minutes to get running
+- **[Interactive Shell Guide](docs/INTERACTIVE_MODE_GUIDE.md)** - Complete shell reference
+- **[Command Reference](docs/COMMANDS_REFERENCE.md)** - All available commands
+- **[Performance Guide](docs/PERFORMANCE_UPDATES.md)** - Speed optimization tips
+
+See full documentation in [`docs/`](docs/) directory.
+
+---
+
+## 💡 Usage Examples
+
+### Drug Lookup with Dosing
+```bash
+⚕️  clinical> d amoxicillin --weight 52# --age 5yo
+
+Response:
+
+# Amoxicillin - Pediatric Dosing
+**Patient:** 52 lbs (23.6 kg), 5 years old
+
+## Standard Dosing for Acute Otitis Media
+- Dose: 80-90 mg/kg/day divided BID
+- Calculation: 23.6 kg × 45 mg/kg = 1062 mg/day
+- Give: 530 mg BID (use 400 mg/5 mL suspension)
+- Volume: 6.5 mL BID
+
+[Full response continues streaming...]
+
+Tip: Use 'copy' command to copy this to clipboard
+```
+
+### Clinical Decision Support
+```bash
+⚕️  clinical> cds 5yo with fever x3 days, ear pain, decreased hearing
+
+Response:
+
+# Clinical Assessment: Acute Otitis Media (AOM)
+
+## Key Features
+This 5-year-old with fever, ear pain, and decreased hearing...
+[Comprehensive assessment streams in real-time]
+
+⚕️  clinical> copy
+✓ Copied 2103 characters to clipboard
+```
+
+### Quick Dose Calculation
+```bash
+⚕️  clinical> dose ibuprofen 40#
+
+Response:
+# Ibuprofen - Quick Dose
+- Weight: 40 lbs (18.2 kg)
+- Dose: 10 mg/kg = 182 mg
+- Give: 9 mL of 100 mg/5 mL suspension
+- Frequency: Every 6-8 hours PRN
+```
+
+### Switch Models
+```bash
+⚕️  clinical> model
+═══ Available Models ═══
+
+Anthropic Claude (Cloud):
+  [✓] claude-haiku-4-5-20251001    # Default, fast
+  [ ] claude-sonnet-4-5-20250929   # Best quality
+
+⚕️  clinical> model claude-sonnet-4-5-20250929
+✓ Switched to Anthropic model: claude-sonnet-4-5-20250929
+```
+
+---
+
+## 🎨 Why This Tool?
+
+### Speed
+- ⚡ **Streaming responses** - Start reading in 200ms
+- ⚡ **Claude Haiku 4.5 default** - 1-2 second responses
+- ⚡ **Single-line commands** - No Ctrl+D needed
+
+### User Experience
+- ✅ **No interruptions** - Copy only when you want
+- ✅ **Natural workflow** - Like talking to a colleague
+- ✅ **Rich formatting** - Clear, readable output
+- ✅ **Tab completion** - Fast command entry
+
+### Clinical Focus
+- 🎯 **Pediatric-optimized** - Weight-based dosing, age-appropriate guidance
+- 🎯 **Safety-first** - Multiple validation layers
+- 🎯 **Red flag detection** - Critical condition alerts
+- 🎯 **Evidence-based** - Source citation requirements
+
+---
+
+## 📋 Requirements
+
+- **Python:** 3.9 or higher
+- **API Key:** Anthropic API key (set in `~/.zshrc` as `ANTHROPIC_API_KEY`)
+- **Optional:** LM Studio or Ollama for offline local models
+- **Platforms:** macOS, Linux, Windows
+
+---
+
+## 🔧 Installation
+
+### Automated Setup (Recommended)
+```bash
+git clone https://github.com/dochobbs/clinicalcli.git
+cd clinicalcli
+./setup.sh
+```
+
+### Manual Setup
+```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate  # macOS/Linux
+# .venv\Scripts\activate   # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Set API key (if not already in ~/.zshrc)
+export ANTHROPIC_API_KEY="your-api-key-here"
+```
+
+### Verify Installation
+```bash
+./clinical-shell
+⚕️  clinical> help
+```
+
+---
+
+## 🎯 Common Workflows
+
+### Quick Drug Lookup
+```bash
+./clinical-shell
+⚕️  clinical> dose amox 52#
+⚕️  clinical> q
+```
+**Time:** ~10 seconds
+
+### Complete Patient Assessment
+```bash
+./clinical-shell
+⚕️  clinical> d amoxicillin --weight 52# --age 5yo
+⚕️  clinical> cds 5yo with fever x3 days, ear pain, decreased hearing
+⚕️  clinical> note 5yo with AOM, starting amoxicillin
+⚕️  clinical> copy
+⚕️  clinical> q
+```
+**Time:** ~2 minutes
+
+### All-Day Clinic Session
+```bash
+./clinical-shell
+# Leave running all day
+⚕️  clinical> d amox --weight 52#      # Patient 1
+⚕️  clinical> d cefdinir --weight 30#  # Patient 2
+⚕️  clinical> cds 12yo with headache...
+⚕️  clinical> stats                     # Check session stats
+⚕️  clinical> q
+```
+
+---
+
+## 🚨 HIPAA Compliance
+
+⚠️ **Protected Health Information (PHI) Warning**
+
+- ✅ **BAA Required** - Use only with Anthropic API under signed Business Associate Agreement
+- ✅ **Authorized Use** - Ensure proper authorization for PHI processing
+- ✅ **Secure Handling** - Do not share outputs containing PHI insecurely
+- ✅ **Audit Trail** - Session logs available via `stats` command
+- ✅ **Session Isolation** - No data persists between sessions
+
+**This tool is designed for HIPAA-compliant use under Anthropic's BAA.**
+
+---
+
+## 📊 Performance
+
+### Response Times
+
+| Model | Speed | Quality | Use Case |
+|-------|-------|---------|----------|
+| **Claude Haiku 4.5** (default) | 1-2 sec ⚡⚡⚡ | Excellent | Quick lookups, routine queries |
+| **Claude Sonnet 4.5** | 2-5 sec ⚡⚡ | Outstanding | Complex cases, critical decisions |
+| **Local Models** (offline) | 30-60 sec ⚠️ | Good | Emergency offline reference |
+
+**Streaming:** First words appear in ~200-500ms regardless of model!
+
+---
+
+## 🔄 Model Management
+
+### Available Models
+
+**Cloud (Anthropic) - Recommended:**
+- `claude-haiku-4-5-20251001` - Default, optimized for speed
+- `claude-sonnet-4-5-20250929` - Best quality for complex cases
+
+**Local (Offline):**
+- LM Studio - User-friendly GUI, any GGUF model
+- Ollama - CLI-based, scriptable
+
+### Switching Models
+```bash
+⚕️  clinical> model                            # List available
+⚕️  clinical> model claude-sonnet-4-5-20250929 # Switch to Sonnet
+⚕️  clinical> model llama3.2                   # Switch to Ollama (if running)
+```
+
+See [Model Selection Guide](docs/SINGLE_LINE_AND_MODEL_SELECTOR.md) for details.
+
+---
+
+## 🛠️ Development
+
+### Project Structure
+```
+clinicalcli/
+├── src/
+│   ├── cli.py              # Single-command CLI
+│   ├── interactive.py      # Interactive shell (main)
+│   ├── model_manager.py    # Multi-model support
+│   ├── utils.py            # Shared utilities
+│   ├── dose_validator.py   # Safety validation
+│   └── commands/           # Command modules
+├── prompts/                # System prompts
+├── docs/                   # Documentation
+├── requirements.txt        # Dependencies
+└── clinical-shell          # Interactive launcher
+```
+
+### Adding Features
+See [Development Guide](docs/DEVELOPMENT.md) (coming soon)
+
+---
+
+## 🐛 Troubleshooting
+
+### API Key Issues
+```bash
+# Check if set
+echo $ANTHROPIC_API_KEY
+
+# If empty, add to ~/.zshrc
+echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+### Import Errors
+```bash
+# Ensure virtual environment is activated
+source .venv/bin/activate
+
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+### Slow Performance
+- **Use Haiku** (default) - 2-3x faster than Sonnet
+- **Local models are slow** - See [Performance Guide](docs/LOCAL_MODEL_PERFORMANCE.md)
+- **Check internet connection** - Cloud models require connectivity
+
+### Command Not Found
+```bash
+# Make shell executable
+chmod +x clinical-shell
+
+# Or run directly
+python -m src.interactive
+```
+
+---
+
+## 🗺️ Roadmap
+
+### Current Version: 1.3.0
+- ✅ Interactive shell mode
+- ✅ Streaming responses
+- ✅ Multi-model support (Claude, LM Studio, Ollama)
+- ✅ Copy on demand
+- ✅ Comprehensive documentation
+
+### Planned Features
+- [ ] Response caching for offline access
+- [ ] Custom prompt templates
+- [ ] Batch processing mode
+- [ ] Integration with EHR systems
+- [ ] Extended local model optimization
+- [ ] Multi-language support
+
+See [ROADMAP.md](docs/ROADMAP.md) for detailed plans (coming soon).
+
+---
+
+## 📝 License
+
+**Internal Use Only** - Requires valid Anthropic API credentials and Business Associate Agreement for PHI processing.
+
+---
+
+## 🙏 Acknowledgments
+
+- **Anthropic** - Claude AI models and HIPAA-compliant API
+- **Rich** - Beautiful terminal formatting
+- **Prompt Toolkit** - Interactive shell features
+
+---
+
+## 📞 Support
+
+### Documentation
+- **Quick Start:** [docs/QUICKSTART.md](docs/QUICKSTART.md)
+- **Full Docs:** [docs/README.md](docs/README.md)
+- **In-app Help:** `⚕️  clinical> help`
+
+### Issues
+Report issues at: https://github.com/dochobbs/clinicalcli/issues
+
+---
+
+**Version:** 1.3.0
 **Last Updated:** November 9, 2025
-**Model:** Claude Sonnet 4.5
+**Default Model:** Claude Haiku 4.5 (fast!)
+**Status:** Production Ready ✅
+
+---
+
+## ⭐ Quick Command Reference
+
+```bash
+# Interactive Shell
+./clinical-shell           # Start shell
+
+# Drug Commands
+d <drug> --weight <wt>     # Drug lookup with dosing
+dose <drug> <weight>       # Quick dose
+compare <d1> <d2>          # Compare drugs
+
+# Clinical Commands
+cds <presentation>         # Clinical decision support
+ddx <presentation>         # Differential diagnosis
+note <info>                # Generate note
+parse <file>               # Analyze document
+
+# Utilities
+copy                       # Copy last output
+model                      # List/switch models
+stats                      # Session statistics
+help                       # Show help
+quit                       # Exit
+
+# Examples
+d amoxicillin --weight 52# --age 5yo
+cds 5yo with fever, ear pain
+note 5yo with AOM, starting antibiotics
+copy
+```
+
+**Get started in 5 minutes:** [Quick Start Guide](docs/QUICKSTART.md)
