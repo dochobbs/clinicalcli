@@ -9,10 +9,51 @@ from contextlib import redirect_stdout
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from src.model_manager import ModelManager
+from src import model_manager as model_manager_module
+from src import utils
+from src.model_manager import ModelManager, get_model_manager
 
 
 class ModelManagerOpenAITests(unittest.TestCase):
+    def test_openai_only_default_routes_first_text_request(self) -> None:
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-openai-key"}, clear=True):
+            with patch.object(model_manager_module, "_model_manager", None):
+                manager = get_model_manager()
+
+                self.assertEqual(manager.model_type, "openai")
+                self.assertEqual(manager.current_model, "gpt-5.1")
+
+                with patch.object(manager, "_call_openai", return_value="answer") as call_openai:
+                    result = utils.call_claude("system", "question")
+
+        self.assertEqual(result, "answer")
+        call_openai.assert_called_once_with("system", "question", 4096)
+
+    def test_anthropic_key_takes_precedence_when_both_keys_are_available(self) -> None:
+        with patch.dict(
+            os.environ,
+            {
+                "ANTHROPIC_API_KEY": "test-anthropic-key",
+                "OPENAI_API_KEY": "test-openai-key",
+            },
+            clear=True,
+        ):
+            manager = ModelManager()
+
+        self.assertEqual(manager.model_type, "anthropic")
+        self.assertEqual(manager.current_model, ModelManager.ANTHROPIC_MODELS[0])
+
+    def test_keyless_initialization_leaves_local_provider_selection_manual(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            with patch.object(ModelManager, "check_lmstudio_available") as check_lmstudio:
+                with patch.object(ModelManager, "check_ollama_available") as check_ollama:
+                    manager = ModelManager()
+
+        self.assertEqual(manager.model_type, "anthropic")
+        self.assertEqual(manager.current_model, ModelManager.ANTHROPIC_MODELS[0])
+        check_lmstudio.assert_not_called()
+        check_ollama.assert_not_called()
+
     def test_set_model_selects_openai_with_key(self) -> None:
         manager = ModelManager()
 
@@ -89,6 +130,25 @@ class ModelManagerOpenAITests(unittest.TestCase):
     def _capture_client(kwargs, client, request):
         request.update(kwargs)
         return client
+
+
+class FileProviderRoutingTests(unittest.TestCase):
+    def test_openai_selection_rejects_files_before_client_or_processing(self) -> None:
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-openai-key"}, clear=True):
+            manager = ModelManager()
+
+            with patch.object(model_manager_module, "_model_manager", manager):
+                with patch.object(utils, "get_anthropic_client") as get_anthropic_client:
+                    with patch.object(utils, "detect_file_type") as detect_file_type:
+                        with self.assertRaisesRegex(ValueError, "No file data was sent"):
+                            utils.call_claude_with_files(
+                                "system",
+                                "question",
+                                ["/tmp/patient-image.png"],
+                            )
+
+        get_anthropic_client.assert_not_called()
+        detect_file_type.assert_not_called()
 
 
 if __name__ == "__main__":

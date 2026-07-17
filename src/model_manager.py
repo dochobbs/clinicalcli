@@ -26,8 +26,15 @@ class ModelManager:
     ]
 
     def __init__(self):
-        self.current_model = "claude-sonnet-4-5-20250929"  # Default to Sonnet (best quality)
-        self.model_type = "anthropic"  # or "openai" or "ollama" or "lmstudio"
+        # Prefer Anthropic when it is configured. In an OpenAI-only environment,
+        # start with a usable OpenAI model so the first text request cannot be
+        # routed to an unconfigured provider. Local providers remain opt-in.
+        if not os.getenv("ANTHROPIC_API_KEY") and os.getenv("OPENAI_API_KEY"):
+            self.current_model = self.OPENAI_MODELS[0]
+            self.model_type = "openai"
+        else:
+            self.current_model = self.ANTHROPIC_MODELS[0]
+            self.model_type = "anthropic"
         self.ollama_base_url = "http://localhost:11434"  # Default Ollama URL
         self.lmstudio_base_url = "http://localhost:1234/v1"  # Default LM Studio URL
 
