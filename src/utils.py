@@ -224,6 +224,16 @@ def call_claude_with_files(
     Returns:
         Claude's response as string
     """
+    from .model_manager import get_model_manager
+
+    model_manager = get_model_manager()
+    if model_manager.model_type != "anthropic":
+        raise ValueError(
+            "Image/file analysis is currently supported only with Anthropic "
+            f"models, not {model_manager.get_current_model_info()}. "
+            "No file data was sent. Switch to an Anthropic model before retrying."
+        )
+
     client = get_anthropic_client()
 
     # Build content list
