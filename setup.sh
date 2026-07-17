@@ -3,6 +3,9 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 echo "🏥 Clinical CLI Setup"
 echo "===================="
 echo ""
@@ -30,18 +33,20 @@ pip install --upgrade pip
 echo "Installing dependencies..."
 pip install -r requirements.txt
 
-# Check for API key
+# Check for cloud-provider API keys
 echo ""
-echo "Checking for ANTHROPIC_API_KEY..."
-if [ -z "$ANTHROPIC_API_KEY" ]; then
-    echo "⚠️  ANTHROPIC_API_KEY not found in environment"
+echo "Checking cloud model credentials..."
+if [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$OPENAI_API_KEY" ]; then
+    echo "⚠️  No Anthropic or OpenAI API key found"
     echo ""
-    echo "Please ensure your API key is set in ~/.zshrc:"
+    echo "Cloud models require the corresponding provider key:"
     echo "  export ANTHROPIC_API_KEY='your-key-here'"
+    echo "  export OPENAI_API_KEY='your-key-here'"
     echo ""
-    echo "Then restart your terminal or run: source ~/.zshrc"
+    echo "Local Ollama and LM Studio models can be used without a cloud key."
 else
-    echo "✓ ANTHROPIC_API_KEY found"
+    [ -n "$ANTHROPIC_API_KEY" ] && echo "✓ ANTHROPIC_API_KEY found"
+    [ -n "$OPENAI_API_KEY" ] && echo "✓ OPENAI_API_KEY found"
 fi
 
 # Make CLI executable
@@ -58,7 +63,7 @@ echo "  1. Activate virtual environment: source .venv/bin/activate"
 echo "  2. Run commands: python src/cli.py <command>"
 echo ""
 echo "Optional: Add this alias to your ~/.zshrc for easier access:"
-echo "  alias clinical='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && source .venv/bin/activate && python src/cli.py'"
+echo "  alias clinical='$SCRIPT_DIR/clinical-shell'"
 echo ""
 echo "Then use: clinical cds, clinical note, etc."
 echo ""

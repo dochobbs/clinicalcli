@@ -1,7 +1,8 @@
 """
-Model Manager - Support for Anthropic Claude and local models (Ollama)
+Model Manager - Support for Anthropic Claude, OpenAI GPT, and local models
 
-Allows switching between cloud-based Claude and local models for offline use.
+Allows switching between cloud-based models (Claude, GPT) and local models for offline use.
+Supports: Anthropic Claude, OpenAI GPT-5.1, Ollama, and LM Studio.
 """
 
 import os
@@ -20,9 +21,13 @@ class ModelManager:
         "claude-haiku-4-5-20251001",   # Latest Haiku (faster)
     ]
 
+    OPENAI_MODELS = [
+        "gpt-5.1",
+    ]
+
     def __init__(self):
         self.current_model = "claude-sonnet-4-5-20250929"  # Default to Sonnet (best quality)
-        self.model_type = "anthropic"  # or "ollama" or "lmstudio"
+        self.model_type = "anthropic"  # or "openai" or "ollama" or "lmstudio"
         self.ollama_base_url = "http://localhost:11434"  # Default Ollama URL
         self.lmstudio_base_url = "http://localhost:1234/v1"  # Default LM Studio URL
 
@@ -33,6 +38,18 @@ class ModelManager:
             self.current_model = model_name
             self.model_type = "anthropic"
             console.print(f"[green]✓ Switched to Anthropic model: {model_name}[/green]")
+            return True
+
+        # Check if it's an OpenAI model
+        if model_name in self.OPENAI_MODELS:
+            # Verify API key is set
+            if not os.getenv("OPENAI_API_KEY"):
+                console.print("[red]✗ OPENAI_API_KEY not set[/red]")
+                console.print("[dim]Set with: export OPENAI_API_KEY='sk-...'[/dim]")
+                return False
+            self.current_model = model_name
+            self.model_type = "openai"
+            console.print(f"[green]✓ Switched to OpenAI model: {model_name}[/green]")
             return True
 
         # Try LM Studio first (faster to check)
@@ -113,6 +130,16 @@ class ModelManager:
             marker = "✓" if model == self.current_model and self.model_type == "anthropic" else " "
             console.print(f"  [{marker}] {model}")
 
+        # OpenAI models
+        console.print("\n[yellow]OpenAI (Cloud):[/yellow]")
+        if os.getenv("OPENAI_API_KEY"):
+            for model in self.OPENAI_MODELS:
+                marker = "✓" if model == self.current_model and self.model_type == "openai" else " "
+                console.print(f"  [{marker}] {model}")
+        else:
+            console.print("  [dim]OPENAI_API_KEY not set[/dim]")
+            console.print("  [dim]Set with: export OPENAI_API_KEY='sk-...'[/dim]")
+
         # LM Studio models
         console.print("\n[yellow]LM Studio (Local):[/yellow]")
         if self.check_lmstudio_available():
@@ -164,6 +191,8 @@ class ModelManager:
         """Get current model info string."""
         if self.model_type == "anthropic":
             return f"Claude ({self.current_model})"
+        elif self.model_type == "openai":
+            return f"OpenAI ({self.current_model})"
         elif self.model_type == "lmstudio":
             return f"LM Studio ({self.current_model})"
         else:
@@ -173,10 +202,12 @@ class ModelManager:
         """
         Call the currently selected model.
 
-        Routes to Anthropic, LM Studio, or Ollama based on current selection.
+        Routes to Anthropic, OpenAI, LM Studio, or Ollama based on current selection.
         """
         if self.model_type == "anthropic":
             return self._call_anthropic(system_prompt, user_message, max_tokens)
+        elif self.model_type == "openai":
+            return self._call_openai(system_prompt, user_message, max_tokens)
         elif self.model_type == "lmstudio":
             return self._call_lmstudio(system_prompt, user_message, max_tokens)
         else:
@@ -204,6 +235,38 @@ class ModelManager:
             ]
         ) as stream:
             for text in stream.text_stream:
+                print(text, end='', flush=True)
+                full_text.append(text)
+
+        print()  # Add newline at end
+        return ''.join(full_text)
+
+    def _call_openai(self, system_prompt: str, user_message: str, max_tokens: int) -> str:
+        """Call OpenAI API with streaming."""
+        from openai import OpenAI
+
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            raise ValueError("OPENAI_API_KEY not set")
+
+        client = OpenAI(api_key=api_key)
+
+        # Stream the response for better UX
+        full_text = []
+
+        stream = client.chat.completions.create(
+            model=self.current_model,
+            max_completion_tokens=max_tokens,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            stream=True
+        )
+
+        for chunk in stream:
+            if chunk.choices[0].delta.content is not None:
+                text = chunk.choices[0].delta.content
                 print(text, end='', flush=True)
                 full_text.append(text)
 

@@ -14,7 +14,6 @@ Features:
 """
 
 import os
-import sys
 from datetime import datetime
 from typing import Optional, Dict
 
@@ -147,7 +146,11 @@ class ClinicalShell:
 
         # Show HIPAA notice once per session
         if not self.hipaa_shown:
-            console.print("\n[yellow]⚠️  PHI Notice:[/yellow] Data sent to Anthropic under BAA. Handle PHI appropriately.\n")
+            console.print(
+                "\n[yellow]⚠️  PHI Notice:[/yellow] Data may be sent to the selected "
+                "model provider. Use PHI only when that provider is approved by your "
+                "organization and covered by an applicable BAA.\n"
+            )
             self.hipaa_shown = True
 
     def show_help(self):
@@ -230,8 +233,9 @@ model set <name>            # Switch to model
 
 Examples:
   model                     # Show available models
-  model llama3.2            # Switch to local Ollama model
   model claude-sonnet-4-5-20250929  # Switch to Claude
+  model gpt-5.1             # Switch to OpenAI GPT-5.1
+  model llama3.2            # Switch to local Ollama model
 ```
 
 ## Session Statistics
@@ -756,13 +760,6 @@ OUTPUT FORMAT: QUICK (concise but complete)
 
 def main():
     """Main entry point for interactive shell."""
-    # Verify API key
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        console.print("[red]Error: ANTHROPIC_API_KEY not found in environment[/red]")
-        console.print("[yellow]Set it in ~/.zshrc or export it in your shell[/yellow]")
-        sys.exit(1)
-
-    # Start interactive shell
     shell = ClinicalShell()
     shell.run()
 

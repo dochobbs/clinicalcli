@@ -50,8 +50,9 @@ cd clinicalcli
 ### 🤖 AI Model Support
 - **Default:** Claude Haiku 4.5 (1-2 sec, optimized for speed) ⚡
 - **Quality:** Claude Sonnet 4.5 (2-5 sec, best for complex cases)
+- **OpenAI:** GPT-5.1 with streamed interactive text responses
 - **Offline:** LM Studio and Ollama for local models
-- **Easy switching:** `model llama3.2` or `model claude-sonnet-4-5-20250929`
+- **Easy switching:** `model gpt-5.1`, `model llama3.2`, or `model claude-sonnet-4-5-20250929`
 
 ### 🛡️ Safety Features
 - **3-layer dosing validation** - Weight, age, and range checking
@@ -134,6 +135,9 @@ Anthropic Claude (Cloud):
   [✓] claude-haiku-4-5-20251001    # Default, fast
   [ ] claude-sonnet-4-5-20250929   # Best quality
 
+OpenAI (Cloud):
+  [ ] gpt-5.1
+
 ⚕️  clinical> model claude-sonnet-4-5-20250929
 ✓ Switched to Anthropic model: claude-sonnet-4-5-20250929
 ```
@@ -164,8 +168,8 @@ Anthropic Claude (Cloud):
 ## 📋 Requirements
 
 - **Python:** 3.9 or higher
-- **API Key:** Anthropic API key (set in `~/.zshrc` as `ANTHROPIC_API_KEY`)
-- **Optional:** LM Studio or Ollama for offline local models
+- **Cloud API key:** Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` for the corresponding provider
+- **Optional:** LM Studio or Ollama for offline local models without a cloud key
 - **Platforms:** macOS, Linux, Windows
 
 ---
@@ -189,8 +193,9 @@ source .venv/bin/activate  # macOS/Linux
 # Install dependencies
 pip install -r requirements.txt
 
-# Set API key (if not already in ~/.zshrc)
+# Set the key for the cloud provider you intend to use
 export ANTHROPIC_API_KEY="your-api-key-here"
+# or: export OPENAI_API_KEY="your-api-key-here"
 ```
 
 ### Verify Installation
@@ -239,13 +244,13 @@ export ANTHROPIC_API_KEY="your-api-key-here"
 
 ⚠️ **Protected Health Information (PHI) Warning**
 
-- ✅ **BAA Required** - Use only with Anthropic API under signed Business Associate Agreement
+- ✅ **BAA Required** - Use PHI only with a selected cloud provider covered by an applicable Business Associate Agreement
 - ✅ **Authorized Use** - Ensure proper authorization for PHI processing
 - ✅ **Secure Handling** - Do not share outputs containing PHI insecurely
 - ✅ **Audit Trail** - Session logs available via `stats` command
 - ✅ **Session Isolation** - No data persists between sessions
 
-**This tool is designed for HIPAA-compliant use under Anthropic's BAA.**
+**This tool does not make a deployment HIPAA compliant by itself. Use only in an organizationally approved environment with the selected provider, data controls, and applicable agreements reviewed.**
 
 ---
 
@@ -257,6 +262,7 @@ export ANTHROPIC_API_KEY="your-api-key-here"
 |-------|-------|---------|----------|
 | **Claude Haiku 4.5** (default) | 1-2 sec ⚡⚡⚡ | Excellent | Quick lookups, routine queries |
 | **Claude Sonnet 4.5** | 2-5 sec ⚡⚡ | Outstanding | Complex cases, critical decisions |
+| **OpenAI GPT-5.1** | Varies | Advanced | Interactive text workflows |
 | **Local Models** (offline) | 30-60 sec ⚠️ | Good | Emergency offline reference |
 
 **Streaming:** First words appear in ~200-500ms regardless of model!
@@ -271,6 +277,9 @@ export ANTHROPIC_API_KEY="your-api-key-here"
 - `claude-haiku-4-5-20251001` - Default, optimized for speed
 - `claude-sonnet-4-5-20250929` - Best quality for complex cases
 
+**Cloud (OpenAI):**
+- `gpt-5.1` - Streamed interactive text responses
+
 **Local (Offline):**
 - LM Studio - User-friendly GUI, any GGUF model
 - Ollama - CLI-based, scriptable
@@ -279,6 +288,7 @@ export ANTHROPIC_API_KEY="your-api-key-here"
 ```bash
 ⚕️  clinical> model                            # List available
 ⚕️  clinical> model claude-sonnet-4-5-20250929 # Switch to Sonnet
+⚕️  clinical> model gpt-5.1                    # Switch to OpenAI
 ⚕️  clinical> model llama3.2                   # Switch to Ollama (if running)
 ```
 
@@ -315,9 +325,11 @@ See [Development Guide](docs/DEVELOPMENT.md) (coming soon)
 ```bash
 # Check if set
 echo $ANTHROPIC_API_KEY
+echo $OPENAI_API_KEY
 
 # If empty, add to ~/.zshrc
 echo 'export ANTHROPIC_API_KEY="your-key-here"' >> ~/.zshrc
+# or: echo 'export OPENAI_API_KEY="your-key-here"' >> ~/.zshrc
 source ~/.zshrc
 ```
 
@@ -351,7 +363,7 @@ python -m src.interactive
 ### Current Version: 1.3.0
 - ✅ Interactive shell mode
 - ✅ Streaming responses
-- ✅ Multi-model support (Claude, LM Studio, Ollama)
+- ✅ Multi-model support (Claude, OpenAI, LM Studio, Ollama)
 - ✅ Copy on demand
 - ✅ Comprehensive documentation
 
@@ -369,13 +381,14 @@ See [ROADMAP.md](docs/ROADMAP.md) for detailed plans (coming soon).
 
 ## 📝 License
 
-**Internal Use Only** - Requires valid Anthropic API credentials and Business Associate Agreement for PHI processing.
+**Internal Use Only** - PHI processing requires organizational approval and an applicable agreement with the selected cloud provider.
 
 ---
 
 ## 🙏 Acknowledgments
 
-- **Anthropic** - Claude AI models and HIPAA-compliant API
+- **Anthropic** - Claude AI models and API
+- **OpenAI** - GPT models through the OpenAI API
 - **Rich** - Beautiful terminal formatting
 - **Prompt Toolkit** - Interactive shell features
 
