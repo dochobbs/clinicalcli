@@ -4,7 +4,7 @@
 
 ### Step 1: Run Setup Script
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./setup.sh
 ```
 
@@ -51,7 +51,7 @@ python src/cli.py handout --condition "diabetes"
 ### Using an Alias (Recommended)
 Add to your `~/.zshrc`:
 ```bash
-alias clinical='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && source .venv/bin/activate && python src/cli.py'
+alias clinical='cd /Users/dochobbs/consult/Claude/clinical-cli && source .venv/bin/activate && python src/cli.py'
 ```
 
 Then from anywhere:
@@ -146,7 +146,7 @@ Mark urgent cases:
 
 ### "Command not found: clinical"
 - Make sure you're in the right directory
-- Or use the full path: `/Users/dochobbs/Downloads/Consult/Claude/clinical-cli/clinical`
+- Or use the full path: `/Users/dochobbs/consult/Claude/clinical-cli/clinical`
 - Or set up the alias in ~/.zshrc
 
 ### "Module not found"
@@ -181,7 +181,7 @@ source ~/.zshrc
 
 ```bash
 # Start in project directory
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 
 # Generate DDx for a case
 ./clinical ddx --system cardiac --age "65 year old"

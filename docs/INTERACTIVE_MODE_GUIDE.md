@@ -8,7 +8,7 @@ The interactive shell keeps the CLI running persistently for rapid-fire queries.
 
 ### Launch Interactive Shell
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./clinical-shell
 ```
 
@@ -300,7 +300,7 @@ s
 ### Option 1: Alias (Fastest Access)
 Add to `~/.zshrc`:
 ```bash
-alias clinic='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && ./clinical-shell'
+alias clinic='cd /Users/dochobbs/consult/Claude/clinical-cli && ./clinical-shell'
 ```
 
 Then from anywhere:
@@ -312,7 +312,7 @@ clinic
 ### Option 2: Path (Run from Anywhere)
 Add to `~/.zshrc`:
 ```bash
-export PATH="$PATH:/Users/dochobbs/Downloads/Consult/Claude/clinical-cli"
+export PATH="$PATH:/Users/dochobbs/consult/Claude/clinical-cli"
 ```
 
 Then from anywhere:
@@ -397,7 +397,7 @@ s             # Shortcut for state
 echo $ANTHROPIC_API_KEY
 
 # Activate venv manually
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 source .venv/bin/activate
 python src/interactive.py
 ```
@@ -484,7 +484,7 @@ $ ./clinical-shell
 
 **Ready to try it?**
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./clinical-shell
 
 # Your first command:

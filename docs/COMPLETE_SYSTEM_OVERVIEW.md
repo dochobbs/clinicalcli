@@ -437,7 +437,7 @@ clinical-cli/
 ### Day 4: Integrate into Workflow
 ```bash
 # Add to ~/.zshrc:
-alias clinic='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && ./clinical-shell'
+alias clinic='cd /Users/dochobbs/consult/Claude/clinical-cli && ./clinical-shell'
 
 # Then:
 clinic
@@ -598,7 +598,7 @@ You now have a **complete, production-ready clinical decision support system** w
 
 **Ready to use it?**
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./clinical-shell
 
 ⚕️  clinical> help
@@ -607,7 +607,7 @@ cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
 **Add to your workflow:**
 ```bash
 # Add to ~/.zshrc
-alias clinic='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && ./clinical-shell'
+alias clinic='cd /Users/dochobbs/consult/Claude/clinical-cli && ./clinical-shell'
 
 # Then just:
 clinic

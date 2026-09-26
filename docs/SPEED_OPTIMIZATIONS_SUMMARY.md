@@ -271,7 +271,7 @@ vim prompts/drug_lookup.md
 
 ### Setup Once
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 
 # Make launcher executable (already done)
 chmod +x clinical-shell
@@ -532,7 +532,7 @@ sw 30# → Query → Query → clear
 **Add to daily routine:**
 ```bash
 # Add to ~/.zshrc:
-alias clinic='cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli && ./clinical-shell'
+alias clinic='cd /Users/dochobbs/consult/Claude/clinical-cli && ./clinical-shell'
 
 # Then:
 clinic

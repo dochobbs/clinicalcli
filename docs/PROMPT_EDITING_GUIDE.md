@@ -22,7 +22,7 @@ clinical-cli/
 ### Step 1: Locate the File
 
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli/prompts
+cd /Users/dochobbs/consult/Claude/clinical-cli/prompts
 ls -la
 ```
 
