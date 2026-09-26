@@ -3,7 +3,7 @@
 ## 🚀 Start the Shell
 
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./clinical-shell
 ```
 

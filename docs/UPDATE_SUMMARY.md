@@ -139,13 +139,13 @@ Commands now accept `--file` or `-f` flag to attach documents:
 
 ### For Fresh Install
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 ./setup.sh
 ```
 
 ### To Update Existing Installation
 ```bash
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
@@ -214,7 +214,7 @@ Already done! Dependencies installed and tested.
 
 ```bash
 # Navigate to tool
-cd /Users/dochobbs/Downloads/Consult/Claude/clinical-cli
+cd /Users/dochobbs/consult/Claude/clinical-cli
 
 # Parse lab results
 ./clinical parse ~/Documents/patient-labs.pdf --type labs
